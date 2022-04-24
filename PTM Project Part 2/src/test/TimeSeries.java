@@ -6,10 +6,11 @@ import java.util.List;
 
 public class TimeSeries
 {
-	//public List<String> rows = new ArrayList<String>(); // each list is a row in the csv file
-	public ArrayList<String>[] arr1; // actual array used in class by other classes
+	public String[] values; // actual array used in class by other classes
+	public int collumnsNum; // TODO Change to 0
+	public List<String> lists;
 	
-	public TimeSeries(String csvFileName)
+	public TimeSeries(String csvFileName) // Ctor
 	{
 		BufferedReader reader = null;
 		String line = "";
@@ -17,52 +18,41 @@ public class TimeSeries
 		try
 		{
 			reader = new BufferedReader(new FileReader(csvFileName));
-			int idx = 0; // the index of each line
-			int rowNum = 0; // to count the number of a rows in the csv file and determine the size of the ArrayList
 			
-			/* Count number of columns */
-			while((line = reader.readLine()) != null)
-			{
-				String[] row1 = line.split(",");
-				rowNum++;
-				System.out.println("size: " + rowNum);
-			}
-			reader.close();
-			/* <End>Count number of columns */
+			/* Get the number of columns into a variable */
+			line = reader.readLine();
+	    	values = line.split(",");
+	    	collumnsNum = values.length;
+	    	System.out.println("Num of columns: " + collumnsNum);
+		    /* ^Get the number of columns into a variable^ */
 			
-			reader = new BufferedReader(new FileReader(csvFileName));
-			line = "";
-			ArrayList<String>[] arr = new ArrayList[rowNum]; // Array of lists (each arr[idx] is a list which resembles a row)
-			
-			while((line = reader.readLine()) != null)
-			{
-				arr[idx] = new ArrayList<String>();
-				String[] row = line.split(",");
-				
-				for(String index : row)
-				{	
-					arr[idx].add(index); // add row's value to the list
-					System.out.println("new index: " + arr[idx]);
-				}
-				
-				System.out.println(arr);
-				arr1 = arr; // copy arr's values to arr1's values so arr1 can be used as the class'es data container
-				idx++;
-				System.out.println("arr1: "+arr1);
-			}
+		    
+	    	/* Get each columns into a list */
+		    for (int i = 0; i < collumnsNum; i++)
+		    {
+		    	reader.close();
+		    	reader = new BufferedReader(new FileReader(csvFileName));
+		    	while((line = reader.readLine()) != null)
+		    	{
+		    		values = line.split(",");
+		    		System.out.println("Time: " + values[i]);		
+		    	}
+		    }
+		    /* Get each columns into a list */
 		}
-		catch(Exception e)
+		
+		catch (FileNotFoundException e)
 		{
 			e.printStackTrace();
 		}
-		finally
+		catch (IOException e)
 		{
-			try {
-				reader.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			e.printStackTrace();
 		}
+	}
+
+	public String GetAttributeColumn(int arrIndex)
+	{
+		return this.values[arrIndex];
 	}
 }
