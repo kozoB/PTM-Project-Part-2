@@ -6,9 +6,10 @@ import java.util.List;
 
 public class TimeSeries
 {
-	public String[] values; // actual array used in class by other classes
-	public int collumnsNum; // TODO Change to 0
-	public List<String> lists;
+	public String[] values;
+	public int collumnsNum;
+	//public List<String> columnsList = new ArrayList<>(); // a list of each column in an array of lists
+	public List<ArrayList<String>> columnsList = new ArrayList<ArrayList<String>>();
 	
 	public TimeSeries(String csvFileName) // Ctor
 	{
@@ -30,13 +31,19 @@ public class TimeSeries
 	    	/* Get each columns into a list */
 		    for (int i = 0; i < collumnsNum; i++)
 		    {
+		    	ArrayList<String> column = new ArrayList<String>(); // Create a new list which represents a column
 		    	reader.close();
 		    	reader = new BufferedReader(new FileReader(csvFileName));
-		    	while((line = reader.readLine()) != null)
+		    	
+		    	while((line = reader.readLine()) != null) // Iterate through the collumn's values
 		    	{
 		    		values = line.split(",");
-		    		System.out.println("Time: " + values[i]);		
+		    		System.out.println("Value: " + values[i]);	// TODO: 	DEBUG
+			    	column.add(values[i]); // Add the current iterated value to the column's list
 		    	}
+		    	System.out.println("\n**************\n");   // TODO:   	DEBUG
+
+		    	columnsList.add(column); // Add the new column to the list of columns
 		    }
 		    /* Get each columns into a list */
 		}
@@ -51,8 +58,8 @@ public class TimeSeries
 		}
 	}
 
-	public String GetAttributeColumn(int arrIndex)
+	public ArrayList<String> GetAttributeColumn(int arrIndex) // Get an index and return the column of this index from the list of columns
 	{
-		return this.values[arrIndex];
+		return columnsList.get(arrIndex);
 	}
 }
