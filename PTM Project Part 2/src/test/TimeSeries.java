@@ -8,8 +8,7 @@ public class TimeSeries
 {
 	public String[] values;
 	public int collumnsNum;
-	//public List<String> columnsList = new ArrayList<>(); // a list of each column in an array of lists
-	public List<ArrayList<String>> columnsList = new ArrayList<ArrayList<String>>();
+	public List<ArrayList<String>> columnsList = new ArrayList<ArrayList<String>>(); // a list of each column in an array of lists
 	
 	public TimeSeries(String csvFileName) // Ctor
 	{
@@ -58,8 +57,33 @@ public class TimeSeries
 		}
 	}
 
-	public ArrayList<String> GetAttributeColumn(int arrIndex) // Get an index and return the column of this index from the list of columns
+	public ArrayList<String> GetAttributeColumn(int arrIndex) // Given an index as a parameter and return the column of this index from the list of columns
 	{
 		return columnsList.get(arrIndex);
+	}
+	
+	public List<ArrayList<String>> GetColumnsList() // Return the list of columns of the TimeSeries
+	{
+		return columnsList;
+	}
+	
+	public int GetColumnsNum() // Return the number of columns i the TimeSeries
+	{
+		return this.collumnsNum;
+	}
+	
+	public String GetColumnTimeValue(String columnName, int timeStep) // Given a column Name and a time step (row index) Return the value in that same cell of the TimeSeries 
+	{
+		for (ArrayList<String> column : this.columnsList) // Iterate through each column
+		{
+			if (column.get(0).equals(columnName)) // Find the desired column
+			{
+				System.out.println("Returned desired value: " + column.get(timeStep));
+				return column.get(timeStep); // Return the value in the given row number
+			}
+		}
+		
+		System.out.println("Given column name does not exist in the TimeSeries");
+		return null; // If given column name does not exist in the TimeSeries return null
 	}
 }
