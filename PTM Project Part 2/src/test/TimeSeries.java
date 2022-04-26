@@ -57,9 +57,19 @@ public class TimeSeries
 		}
 	}
 
-	public ArrayList<String> GetAttributeColumn(int arrIndex) // Given an index as a parameter and return the column of this index from the list of columns
+	public ArrayList<String> GetAttributeColumn(String columnName) // Given a column name as a parameter, return the desired column as a list of String
 	{
-		return columnsList.get(arrIndex);
+		for (ArrayList<String> column : this.columnsList) // Iterate through each column in the columns list
+		{
+			if (column.get(0).equals(columnName)) // Find the desired column
+			{
+				System.out.println("Returned desired column: " + column.get(0));
+				return column; // Return the desired column
+			}
+		}
+		
+		System.out.println("Desired column does not exist in the TimeSeries");
+		return null; // If the column does not exist, return null
 	}
 	
 	public List<ArrayList<String>> GetColumnsList() // Return the list of columns of the TimeSeries
@@ -67,23 +77,66 @@ public class TimeSeries
 		return columnsList;
 	}
 	
-	public int GetColumnsNum() // Return the number of columns i the TimeSeries
+	public int GetColumnsNum() // Return the number of columns in the TimeSeries
 	{
 		return this.collumnsNum;
 	}
 	
-	public String GetColumnTimeValue(String columnName, int timeStep) // Given a column Name and a time step (row index) Return the value in that same cell of the TimeSeries 
+	public int GetRowsNum() // Return the number of rows in each column of the TimeSeries (Including attribute name row)
 	{
-		for (ArrayList<String> column : this.columnsList) // Iterate through each column
+		return this.columnsList.get(0).size();
+	}
+	
+	public float GetColumnTimeValue(String columnName, int timeStep) // Given a column Name and a time step (row index) Return the value in that same cell of the TimeSeries as a float
+	{	
+		if (timeStep < 1) // If given illegal time step (time step must be >= 1)
 		{
-			if (column.get(0).equals(columnName)) // Find the desired column
-			{
-				System.out.println("Returned desired value: " + column.get(timeStep));
-				return column.get(timeStep); // Return the value in the given row number
-			}
+			System.out.println("Given illegal time step! It must be >= 1");
+			return Float.NaN;
 		}
 		
-		System.out.println("Given column name does not exist in the TimeSeries");
-		return null; // If given column name does not exist in the TimeSeries return null
+		if (this.GetAttributeColumn(columnName) == null) // Check if the given column exists in the TimeSeries
+		{
+			return Float.NaN;
+		}
+		
+		if (this.GetAttributeColumn(columnName).size() <= timeStep) // Check if the given time step is in column's boundary
+		{
+			System.out.println("Given time step does not exist in the column (out of boundary)");
+			return Float.NaN;
+		}
+		
+		if (this.GetAttributeColumn(columnName).get(timeStep) != null) // If the desired cell was found
+		{
+			System.out.println("Returned desired value: " + this.GetAttributeColumn(columnName).get(timeStep));
+			return Float.parseFloat(this.GetAttributeColumn(columnName).get(timeStep));
+		}
+		
+		System.out.println("Other");
+		return Float.NaN;
+	}
+	
+	public float[] GetColumnArrFloat(String columnName) // Given a column name, return an array of type float with the values of the given column (without the column name row) 
+	{
+		float[] arr = new float[this.GetRowsNum() - 1]; // Create the end float array which will contain the column's numeric values
+		int i = -1; // Index of the iteration of the column's values. It is -1 to prevent the column's attribute name from being included
+		
+		if (this.GetAttributeColumn(columnName) == null) // If given column name does not exist, return null
+		{
+			return null;
+		}
+		
+		List<String> column = this.GetAttributeColumn(columnName);
+		for(String value : column) // Iterate through each numeric value in the given column
+		{
+			if (i != -1) // If it is not the first iteration which has the attribute name
+			{
+				arr[i] = Float.parseFloat(value); // Add current iterated value to the float array		
+			}
+			
+			i++;
+		}	
+		
+		return arr;
 	}
 }

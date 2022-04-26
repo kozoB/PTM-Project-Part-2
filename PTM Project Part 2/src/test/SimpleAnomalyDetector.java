@@ -9,17 +9,9 @@ public class SimpleAnomalyDetector implements TimeSeriesAnomalyDetector {
 	@Override
 	public void learnNormal(TimeSeries ts)
 	{
-		System.out.println("NODER:\n");
-		for (int idx = 0; idx < ts.GetColumnsNum(); idx++)
-		{
-			for(String i : ts.GetAttributeColumn(idx))
-			{
-				System.out.println(i);
-			}			
-		}
-		
-		System.out.println("\n");
-		System.out.println(ts.GetColumnTimeValue("A", 15));
+		System.out.println(ts.GetRowsNum());
+		float[] arr = ts.GetColumnArrFloat("A");
+		System.out.println("Debug");
 	}
 
 
