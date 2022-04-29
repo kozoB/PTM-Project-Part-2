@@ -72,6 +72,17 @@ public class TimeSeries
 		return null; // If the column does not exist, return null
 	}
 	
+	public ArrayList<String> GetAttributeColumn(int index) // Given a column index as a parameter, return the desired column as a list of String
+	{
+		if (index > this.collumnsNum - 1 || index < 0) // If the given column index is more than the there are column indexes or if it's a negative number
+		{
+			System.out.println("Invalid index given, either an out of TimeSeries boundaries index or a negtive index given");
+			return null;
+		}
+		
+		return  this.columnsList.get(index); // Return the desired column by index
+	}
+	
 	public List<ArrayList<String>> GetColumnsList() // Return the list of columns of the TimeSeries
 	{
 		return columnsList;
@@ -127,6 +138,25 @@ public class TimeSeries
 		}
 		
 		List<String> column = this.GetAttributeColumn(columnName);
+		for(String value : column) // Iterate through each numeric value in the given column
+		{
+			if (i != -1) // If it is not the first iteration which has the attribute name
+			{
+				arr[i] = Float.parseFloat(value); // Add current iterated value to the float array		
+			}
+			
+			i++;
+		}	
+		
+		return arr;
+	}
+	
+	public float[] GetColumnArrFloat(int columnIdx) // Given a column index, return an array of type float with the values of the given column (without the column name row) 
+	{
+		float[] arr = new float[this.GetRowsNum() - 1]; // Create the end float array which will contain the column's numeric values
+		int i = -1; // Index of the iteration of the column's values. It is -1 to prevent the column's attribute name from being included
+		
+		List<String> column = this.GetAttributeColumn(columnIdx);
 		for(String value : column) // Iterate through each numeric value in the given column
 		{
 			if (i != -1) // If it is not the first iteration which has the attribute name
