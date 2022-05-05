@@ -1,14 +1,16 @@
 package test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SimpleAnomalyDetector implements TimeSeriesAnomalyDetector {
 	
+	List<CorrelatedFeatures> corrFeatures = new ArrayList<CorrelatedFeatures>(); // List containing all the CorrelatedFeatures
 
 	@Override
 	public void learnNormal(TimeSeries ts) // Perform an upper triangle matrix scan to correlate between each column with the others and find the strongest correlation
 	{
-		float corrThreshold = 0.9f; // a correlation must be above this value
+		float corrThreshold; // a correlation must be above this value
 		int size = ts.GetColumnsNum();
 		int rowsNum = ts.GetRowsNum()-1; // The number of rows in each column without the column name row
 		float[] maxPearsArray = new float[size]; // Array containing the max Pearson correlation of each column (indexes of the array are by the order of the columns in the TimesSeries)
@@ -26,12 +28,13 @@ public class SimpleAnomalyDetector implements TimeSeriesAnomalyDetector {
 					pears = 1; // Prevent pears from being larger than 1 (caused by float values being rounded up)
 				}
 				
-				if (pears > maxPearsArray[i] && pears > corrThreshold) // If the current correlation is the maximum one for the current iterated (i) column (maximum value for each column is stored in 'maxPearsArray') and bigger than 0.9
+				if (pears > maxPearsArray[i]) // If the current correlation is the maximum one for the current iterated (i) column (maximum value for each column is stored in 'maxPearsArray')
 				{
 					maxPearsArray[i] = pears; // Update the max value for this iterated column
 					
 					//////////////////////////////////////////////////
 					// Create parameters to make the Anomaly Report for the current correlation
+					corrThreshold = 0.9f; // TODO: NEED TO REMOVE THIS ASSIGNEMENT
 					String firstColName = ts.GetAttributeColumn(i).get(0); // Save the first correlated column's name (the one on the left) into a variable
 					String secondColName = ts.GetAttributeColumn(j).get(0); // Save the second correlated column's name (the one on the right) into a variable
 					test.Point[] points = new test.Point[rowsNum]; // Create an array of Points of which will provide the Linear Regression. each point in the array is a point made by the values of each line of the correlated columns (left column = x, right column = y)
@@ -44,8 +47,7 @@ public class SimpleAnomalyDetector implements TimeSeriesAnomalyDetector {
 					test.Line regLine = test.StatLib.linear_reg(points); // Create a Line by Linear Regression from the Points array of this correlation 
 					test.CorrelatedFeatures corrFeature = new test.CorrelatedFeatures(firstColName, secondColName, pears, regLine, corrThreshold); // Create a Correlated Feature from the given parameters
 					System.out.println(corrFeature);
-					
-					List<test.CorrelatedFeatures> list = getNormalModel();
+					corrFeatures.add(corrFeature); // Add each new CorrelatedFeature to the CorrelatedFeatures List				
 					//////////////////////////////////////////////////
 				}
 				
@@ -79,7 +81,7 @@ public class SimpleAnomalyDetector implements TimeSeriesAnomalyDetector {
 	
 	public List<CorrelatedFeatures> getNormalModel()
 	{
-	
-		return null;
+		
+		return corrFeatures;
 	}
 }
