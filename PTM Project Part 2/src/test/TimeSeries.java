@@ -23,7 +23,6 @@ public class TimeSeries
 			line = reader.readLine();
 	    	values = line.split(",");
 	    	collumnsNum = values.length;
-	    	System.out.println("Num of columns: " + collumnsNum);
 		    /* ^Get the number of columns into a variable^ */
 			
 		    
@@ -37,10 +36,8 @@ public class TimeSeries
 		    	while((line = reader.readLine()) != null) // Iterate through the collumn's values
 		    	{
 		    		values = line.split(",");
-		    		System.out.println("Value: " + values[i]);	// TODO: 	DEBUG
 			    	column.add(values[i]); // Add the current iterated value to the column's list
 		    	}
-		    	System.out.println("\n**************\n");   // TODO:   	DEBUG
 
 		    	columnsList.add(column); // Add the new column to the list of columns
 		    }
@@ -63,12 +60,10 @@ public class TimeSeries
 		{
 			if (column.get(0).equals(columnName)) // Find the desired column
 			{
-				System.out.println("Returned desired column: " + column.get(0));
 				return column; // Return the desired column
 			}
 		}
 		
-		System.out.println("Desired column does not exist in the TimeSeries");
 		return null; // If the column does not exist, return null
 	}
 	
@@ -76,7 +71,6 @@ public class TimeSeries
 	{
 		if (index > this.collumnsNum - 1 || index < 0) // If the given column index is more than the there are column indexes or if it's a negative number
 		{
-			System.out.println("Invalid index given, either an out of TimeSeries boundaries index or a negtive index given");
 			return null;
 		}
 		
@@ -102,7 +96,6 @@ public class TimeSeries
 	{	
 		if (timeStep < 1) // If given illegal time step (time step must be >= 1)
 		{
-			System.out.println("Given illegal time step! It must be >= 1");
 			return Float.NaN;
 		}
 		
@@ -113,17 +106,14 @@ public class TimeSeries
 		
 		if (this.GetAttributeColumn(columnName).size() <= timeStep) // Check if the given time step is in column's boundary
 		{
-			System.out.println("Given time step does not exist in the column (out of boundary)");
 			return Float.NaN;
 		}
 		
 		if (this.GetAttributeColumn(columnName).get(timeStep) != null) // If the desired cell was found
 		{
-			System.out.println("Returned desired value: " + this.GetAttributeColumn(columnName).get(timeStep));
 			return Float.parseFloat(this.GetAttributeColumn(columnName).get(timeStep));
 		}
 		
-		System.out.println("Other");
 		return Float.NaN;
 	}
 	
