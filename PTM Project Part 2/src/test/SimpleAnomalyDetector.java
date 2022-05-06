@@ -96,8 +96,29 @@ public class SimpleAnomalyDetector implements TimeSeriesAnomalyDetector {
 	@Override
 	public List<AnomalyReport> detect(TimeSeries ts)
 	{
+		List<AnomalyReport> anomalyReports = new ArrayList<AnomalyReport>();
 		
-		return null;
+		int rowsNum = ts.GetRowsNum();
+		
+		for(int i = 0; i < rowsNum; i++)
+		{
+			for(test.CorrelatedFeatures correlation : corrFeatures)
+			{
+				float feature1 = ts.GetColumnTimeValue(correlation.feature1, i);
+				float feature2 = ts.GetColumnTimeValue(correlation.feature2, i);
+				
+				if (Math.abs(feature2 - correlation.lin_reg.f(feature1)) > correlation.threshold)
+				{
+					String description = correlation.feature1 + "-" + correlation.feature2;
+					long timeStep = (long)ts.GetColumnTimeValue(correlation.feature1, i);
+					AnomalyReport anomalyReport = new AnomalyReport(description, timeStep);
+					anomalyReports.add(anomalyReport);
+				}
+			}
+			
+		}
+		
+		return anomalyReports;
 	}
 	
 	public List<CorrelatedFeatures> getNormalModel()
