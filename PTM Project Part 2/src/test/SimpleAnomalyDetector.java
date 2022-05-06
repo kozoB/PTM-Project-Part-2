@@ -89,7 +89,7 @@ public class SimpleAnomalyDetector implements TimeSeriesAnomalyDetector {
 	{
 		List<AnomalyReport> anomalyReports = new ArrayList<AnomalyReport>();
 		
-		int rowsNum = ts.GetRowsNum();
+		int rowsNum = ts.GetRowsNum() - 1;
 		
 		for(int i = 0; i < rowsNum; i++)
 		{
@@ -102,7 +102,7 @@ public class SimpleAnomalyDetector implements TimeSeriesAnomalyDetector {
 				{
 					String description = correlation.feature1 + "-" + correlation.feature2;
 					long timeStep = (long)ts.GetColumnTimeValue(correlation.feature1, i);
-					AnomalyReport anomalyReport = new AnomalyReport(description, timeStep);
+					AnomalyReport anomalyReport = new AnomalyReport(description, i);
 					anomalyReports.add(anomalyReport);
 				}
 			}
