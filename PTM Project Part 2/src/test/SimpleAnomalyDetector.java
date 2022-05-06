@@ -13,7 +13,6 @@ public class SimpleAnomalyDetector implements TimeSeriesAnomalyDetector {
 		float corrThreshold; // a correlation must be above this value
 		int size = ts.GetColumnsNum();
 		int rowsNum = ts.GetRowsNum()-1; // The number of rows in each column without the column name row
-		float[] maxPearsArray = new float[size]; // Array containing the max Pearson correlation of each column (indexes of the array are by the order of the columns in the TimesSeries)
 		
 		for(int i = 0; i < size - 1; i++) // The current column to compare with the others (does not include the last column because it does not have anyone to compare to)
 		{			
@@ -27,46 +26,68 @@ public class SimpleAnomalyDetector implements TimeSeriesAnomalyDetector {
 				{
 					pears = 1; // Prevent pears from being larger than 1 (caused by float values being rounded up)
 				}
+
+				//////////////////////////////////////////////////
+				// Create parameters to make the CorrealtedFeature for the current correlation and add it to the list CorrealtedFeatures
+				corrThreshold = 0f; // A default value for threshold
+				String firstColName = ts.GetAttributeColumn(i).get(0); // Save the first correlated column's name (the one on the left) into a variable
+				String secondColName = ts.GetAttributeColumn(j).get(0); // Save the second correlated column's name (the one on the right) into a variable
+				test.Point[] points = new test.Point[rowsNum]; // Create an array of Points of which will provide the Linear Regression. each point in the array is a point made by the values of each line of the correlated columns (left column = x, right column = y)
 				
-				if (pears > maxPearsArray[i]) // If the current correlation is the maximum one for the current iterated (i) column (maximum value for each column is stored in 'maxPearsArray')
+				for(int row = 0; row < rowsNum; row++) // For each row in the columns (each point)
 				{
-					maxPearsArray[i] = pears; // Update the max value for this iterated column
-					
-					//////////////////////////////////////////////////
-					// Create parameters to make the Anomaly Report for the current correlation
-					corrThreshold = 0.9f; // TODO: NEED TO REMOVE THIS ASSIGNEMENT
-					String firstColName = ts.GetAttributeColumn(i).get(0); // Save the first correlated column's name (the one on the left) into a variable
-					String secondColName = ts.GetAttributeColumn(j).get(0); // Save the second correlated column's name (the one on the right) into a variable
-					test.Point[] points = new test.Point[rowsNum]; // Create an array of Points of which will provide the Linear Regression. each point in the array is a point made by the values of each line of the correlated columns (left column = x, right column = y)
-					for(int row = 0; row < rowsNum; row++)
+					test.Point point = new test.Point(ts.GetColumnArrFloat(i)[row], ts.GetColumnArrFloat(j)[row]); // Create a point from each value in the correlated column (left column is the point's x value, right column is the point's y value)
+					points[row] = point; // Add the created Point to the Points array
+				}
+				
+				test.Line regLine = test.StatLib.linear_reg(points); // Create a Line by Linear Regression from the Points array of this correlation
+				
+				for(int row = 0; row < rowsNum; row++) // For each row in the columns (each point)
+				{
+					if (Math.abs(points[row].y - regLine.f(points[row].x)) > corrThreshold) // Check if the iterated point's y value minus the regLine's y value for the same x is bigger than the threshold
 					{
-						test.Point point = new test.Point(ts.GetColumnArrFloat(i)[row], ts.GetColumnArrFloat(j)[row]); // Create a point from each value in the correlated column (left column is the point's x value, right column is the point's y value)
-						points[row] = point; // Add the created Point to the Points array
+						corrThreshold = Math.abs(points[row].y - regLine.f(points[row].x)); // Make the threshold that same value
+						corrThreshold *= 1.1f; // Add 10% to allow close to threshold values
+					}
+				}
+				
+				test.CorrelatedFeatures corrFeature = new test.CorrelatedFeatures(firstColName, secondColName, pears, regLine, corrThreshold); // Create a Correlated Feature from the given parameters
+				System.out.println(corrFeature);
+				
+				int corrIndex = 0; // To know which correlation is being iterated in case of correlation removal
+				
+				for(test.CorrelatedFeatures correlation : corrFeatures)
+				{
+					if (corrFeature.feature1 == correlation.feature1 || corrFeature.feature1 ==  correlation.feature2 || corrFeature.feature2 ==  correlation.feature2) // if the current iterated column has been added to the correlation list as a left column or a right column
+					{
+						if (corrFeature.corrlation > correlation.corrlation) // If the current correlation is bigger than the one in the list
+						{
+							corrFeatures.remove(corrIndex); // Remove the smaller correlation from the list 
+							corrFeatures.add(corrFeature); // Add the new CorrelatedFeature to the CorrelatedFeatures List
+						}
+						break;
 					}
 					
-					test.Line regLine = test.StatLib.linear_reg(points); // Create a Line by Linear Regression from the Points array of this correlation 
-					test.CorrelatedFeatures corrFeature = new test.CorrelatedFeatures(firstColName, secondColName, pears, regLine, corrThreshold); // Create a Correlated Feature from the given parameters
-					System.out.println(corrFeature);
-					corrFeatures.add(corrFeature); // Add each new CorrelatedFeature to the CorrelatedFeatures List				
-					//////////////////////////////////////////////////
+					if (corrIndex == corrFeatures.size() - 1) // If the current correlation's columns are not in the list, add the correlation to the list
+					{
+						corrFeatures.add(corrFeature); // Add the new CorrelatedFeature to the CorrelatedFeatures List
+						break;
+					}
+					
+					corrIndex++;
 				}
 				
-				if (pears > maxPearsArray[j]) // If the current correlation is the maximum one for the current compared (j) column (maximum value for each column is stored in 'maxPearsArray')
+				if (corrFeatures.size() == 0) // If the sit is empty, add the first correlation anyway
 				{
-					maxPearsArray[j] = pears; // Update the max value for this compared column
+					corrFeatures.add(corrFeature); // Add the new CorrelatedFeature to the CorrelatedFeatures List
 				}
+				//////////////////////////////////////////////////
+
 				
 				System.out.println(i + " column's and " + j + " column's pearson is: " + pears + "\n");
 			}
 			System.out.println("******************************************************************\n");
 		}		
-
-		
-		System.out.println("Maximum Pearson correlation values are:\n");
-		for (int i = 0; i < size; i++)
-		{
-			System.out.println("column " + i + ": " + maxPearsArray[i]);
-		}
 		
 		System.out.println("DEBUG");	
 	}
